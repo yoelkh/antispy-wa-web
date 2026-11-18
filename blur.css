@@ -1,0 +1,108 @@
+/*
+ * AntiSpy Blur — all censoring lives here. JavaScript only flips attributes
+ * on <html>; it never touches individual chats or messages.
+ *
+ * Fail-safe: with no attributes set (script not yet run), everything is
+ * blurred. Attributes only ever relax the defaults.
+ *
+ * Selectors are structural (ids, roles) so they follow WhatsApp's layout at
+ * any window size. The few obfuscated class names are isolated in section 2.
+ *
+ * <html> attributes
+ *   data-wab-left   all | names | off      (absent = all)
+ *   data-wab-right  all | names | off      (absent = all)
+ *   data-wab-lrev   row | panel | key      (absent = row)
+ *   data-wab-rrev   panel | message | key  (absent = panel)
+ *   data-wab-lock   present = hover never reveals (panic / idle / away)
+ *   data-wab-key    present = reveal key is held
+ *   data-wab-media  separate = media stays blurred until hovered itself
+ *   data-wab-fb     left | right | lnames  (fallbacks picked by content.js)
+ */
+
+:root {
+  --wab-blur: 8px;
+  --wab-delay: 120ms;
+  --wab-f: blur(var(--wab-blur)); /* current filter; reveal rules set it to none */
+  --wab-td: 0ms;                  /* re-blur is instant, reveal is delayed */
+  --wab-dur: 160ms;
+}
+
+/* ------------------------------------------------------------------ */
+/* 1. What gets blurred — structural selectors                         */
+/* ------------------------------------------------------------------ */
+
+/* Left: every chat-list row (also search results, archived, contact lists). */
+html:not([data-wab-left="names"], [data-wab-left="off"]) [role="listitem"]:not(#main *) > *,
+html:not([data-wab-left="names"], [data-wab-left="off"]) #pane-side [role="row"]:not([role="listitem"] *),
+html[data-wab-left="names"][data-wab-fb~="lnames"] [role="listitem"]:not(#main *) > *,
+
+/* Right: every message row. Later lines are fallbacks if the role goes away. */
+html:not([data-wab-right="names"], [data-wab-right="off"]) #main [role="row"],
+html:not([data-wab-right="names"], [data-wab-right="off"]) #main [data-id]:not([role="row"] *),
+html:not([data-wab-right="names"], [data-wab-right="off"]) #main :is(.message-in, .message-out):not([role="row"] *, [data-id] *),
+
+/* Right: chat header (photo, name, member list / last seen). */
+html:not([data-wab-right="off"]) #main header :is(img, span[dir="auto"], span[title]):not(span[dir="auto"] *, span[title] *),
+
+/* Whole-panel fallbacks when WhatsApp's row markup is not recognised. */
+html[data-wab-fb~="left"]:not([data-wab-left="off"]) #pane-side > *,
+html[data-wab-fb~="right"]:not([data-wab-right="names"], [data-wab-right="off"]) #main > :not(header, footer) {
+  filter: var(--wab-f);
+  transition: filter var(--wab-dur) ease-out var(--wab-td);
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. Names only — relies on WhatsApp's class names (update here)      */
+/* ------------------------------------------------------------------ */
+
+html[data-wab-left="names"] [role="listitem"]:not(#main *) :is(._ak8q, ._ak8h),
+html[data-wab-right="names"] #main ._ahxj {
+  filter: var(--wab-f);
+  transition: filter var(--wab-dur) ease-out var(--wab-td);
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Reveal — set the variable on the hovered container               */
+/* ------------------------------------------------------------------ */
+
+/* Left, per row (default). */
+html:not([data-wab-lock], [data-wab-lrev="panel"], [data-wab-lrev="key"]) [role="listitem"]:not(#main *):hover,
+html:not([data-wab-lock], [data-wab-lrev="panel"], [data-wab-lrev="key"]) #pane-side [role="row"]:hover,
+/* Left, whole panel (also used by the whole-panel fallback). */
+html[data-wab-lrev="panel"]:not([data-wab-lock]) #pane-side:hover,
+html[data-wab-lrev="panel"]:not([data-wab-lock]) [role="listitem"]:not(#main *, #pane-side *):hover,
+html[data-wab-fb~="left"]:not([data-wab-lock], [data-wab-lrev="key"]) #pane-side:hover,
+/* Left, hold key. */
+html[data-wab-lrev="key"][data-wab-key]:not([data-wab-lock]) :is(#pane-side, [role="listitem"]:not(#main *)),
+
+/* Right, whole panel (default). */
+html:not([data-wab-lock], [data-wab-rrev="message"], [data-wab-rrev="key"]) #main:hover,
+/* Right, per message. The header reveals on its own hover. */
+html[data-wab-rrev="message"]:not([data-wab-lock]) #main :is([role="row"], [data-id], .message-in, .message-out, header):hover,
+/* Right, hold key. */
+html[data-wab-rrev="key"][data-wab-key]:not([data-wab-lock]) #main {
+  --wab-f: none;
+  --wab-td: var(--wab-delay);
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. Media kept blurred separately (optional)                         */
+/* ------------------------------------------------------------------ */
+
+html[data-wab-media="separate"]:not([data-wab-right="names"], [data-wab-right="off"])
+  #main [role="row"] :is(img, video, canvas):not(.emoji, [data-plain-text]) {
+  filter: blur(calc(var(--wab-blur) * 2));
+  transition: filter var(--wab-dur) ease-out;
+}
+
+html[data-wab-media="separate"]:not([data-wab-lock]) #main [role="row"] :is(img, video, canvas):hover,
+html[data-wab-media="separate"]:not([data-wab-lock]) #main [role="row"] [role="button"]:hover :is(img, video, canvas) {
+  filter: none;
+  transition-delay: var(--wab-delay);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --wab-dur: 0ms;
+  }
+}

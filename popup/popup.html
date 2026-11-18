@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AntiSpy Blur</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <img src="../icons/icon48.png" alt="" width="24" height="24">
+      <div>
+        <h1>AntiSpy Blur</h1>
+        <p id="status" class="muted">Blur is on</p>
+      </div>
+    </div>
+    <label class="switch" title="Turn blur on or off">
+      <input type="checkbox" data-key="enabled" aria-label="Blur on or off">
+      <span></span>
+    </label>
+  </header>
+
+  <div id="panic" class="panic" hidden>
+    <span>Panic lock is on. Everything is blurred and hover is ignored.</span>
+    <button type="button" id="unlock">Unlock</button>
+  </div>
+
+  <main id="controls">
+    <section>
+      <h2>What to blur</h2>
+      <div class="tiles" role="radiogroup" aria-label="What to blur">
+        <label class="tile">
+          <input type="radio" name="scope" value="both">
+          <span class="glyph"><i class="on"></i><i class="on"></i></span>
+          <span>Both</span>
+        </label>
+        <label class="tile">
+          <input type="radio" name="scope" value="left">
+          <span class="glyph"><i class="on"></i><i></i></span>
+          <span>Chat list</span>
+        </label>
+        <label class="tile">
+          <input type="radio" name="scope" value="right">
+          <span class="glyph"><i></i><i class="on"></i></span>
+          <span>Messages</span>
+        </label>
+        <label class="tile">
+          <input type="radio" name="scope" value="names">
+          <span class="glyph"><i class="name"></i><i class="name"></i></span>
+          <span>Names only</span>
+        </label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Reveal</h2>
+      <div class="row">
+        <span class="label">Chat list</span>
+        <div class="seg" role="radiogroup" aria-label="Reveal chat list">
+          <label><input type="radio" name="leftReveal" value="row"><span>Hover row</span></label>
+          <label><input type="radio" name="leftReveal" value="panel"><span>Hover panel</span></label>
+          <label><input type="radio" name="leftReveal" value="key"><span>Hold Ctrl</span></label>
+        </div>
+      </div>
+      <div class="row">
+        <span class="label">Messages</span>
+        <div class="seg" role="radiogroup" aria-label="Reveal messages">
+          <label><input type="radio" name="rightReveal" value="panel"><span>Hover panel</span></label>
+          <label><input type="radio" name="rightReveal" value="message"><span>Hover each</span></label>
+          <label><input type="radio" name="rightReveal" value="key"><span>Hold Ctrl</span></label>
+        </div>
+      </div>
+      <div class="row">
+        <label class="label" for="delay">Reveal delay</label>
+        <input type="range" id="delay" data-key="delay" min="0" max="500" step="20">
+        <output for="delay" data-unit="ms"></output>
+      </div>
+      <div class="row">
+        <label class="label" for="blur">Blur strength</label>
+        <input type="range" id="blur" data-key="blur" min="3" max="20" step="1">
+        <output for="blur" data-unit="px"></output>
+      </div>
+    </section>
+
+    <section>
+      <h2>Re-blur automatically</h2>
+      <div class="row">
+        <span class="label">Mouse idle</span>
+        <div class="seg" role="radiogroup" aria-label="Re-blur when the mouse is idle">
+          <label><input type="radio" name="idle" value="0"><span>Off</span></label>
+          <label><input type="radio" name="idle" value="5"><span>5s</span></label>
+          <label><input type="radio" name="idle" value="10"><span>10s</span></label>
+          <label><input type="radio" name="idle" value="30"><span>30s</span></label>
+        </div>
+      </div>
+      <label class="row check">
+        <span class="label wide">When I switch to another window</span>
+        <span class="switch small"><input type="checkbox" data-key="awayBlur"><span></span></span>
+      </label>
+      <label class="row check">
+        <span class="label wide">Keep photos and videos blurred until hovered</span>
+        <span class="switch small"><input type="checkbox" data-key="mediaSeparate"><span></span></span>
+      </label>
+    </section>
+  </main>
+
+  <footer>
+    <div class="keys">
+      <span><kbd id="key-toggle">Alt+X</kbd> on/off</span>
+      <span><kbd id="key-panic">Alt+Shift+X</kbd> panic lock</span>
+    </div>
+    <button type="button" id="shortcuts" class="link">Change shortcuts</button>
+  </footer>
+  <p class="sig">by yoelkh</p>
+
+  <script src="../defaults.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

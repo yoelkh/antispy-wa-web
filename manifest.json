@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "AntiSpy Blur for WA Web",
+  "version": "1.0.0",
+  "description": "Blurs names and messages on WhatsApp Web until you hover. CSS-driven, no tracking, no network.",
+  "author": "yoelkh",
+  "permissions": ["storage"],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "AntiSpy Blur",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "css": ["blur.css"],
+      "js": ["defaults.js", "content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "commands": {
+    "toggle-blur": {
+      "suggested_key": { "default": "Alt+X" },
+      "description": "Turn blur on or off"
+    },
+    "panic": {
+      "suggested_key": { "default": "Alt+Shift+X" },
+      "description": "Panic lock: blur everything and ignore hover"
+    }
+  }
+}
